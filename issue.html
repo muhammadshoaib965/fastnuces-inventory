@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue / Scan Asset</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        button { background-color: #2980b9; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
+        button:hover { background-color: #2471a3; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        .back-btn { background-color: #7f8c8d; margin-bottom: 20px; width: auto; }
+        
+        #message { margin-top: 15px; font-weight: bold; text-align: center; }
+
+        /* Item Details Card */
+        #itemDetails { display: none; background-color: #ecf0f1; padding: 15px; border-radius: 4px; margin-top: 20px; border-left: 5px solid #2c3e50; }
+        .status-badge { display: inline-block; padding: 5px 10px; border-radius: 15px; color: white; font-size: 12px; font-weight: bold; }
+        .status-store { background-color: #27ae60; }
+        .status-issued { background-color: #e67e22; }
+
+        /* Issue Form Details */
+        #issueFormDiv { display: none; margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+
+    <div class="container">
+        <h2>🔍 Scan or Enter Asset Tag</h2>
+        
+        <div class="form-group">
+            <input type="text" id="assetTag" placeholder="e.g., TBL-TEA-001" style="text-transform: uppercase;">
+            <button onclick="triggerLookup()" id="lookupBtn">Look Up Item</button>
+        </div>
+
+        <div id="message"></div>
+
+        <div id="itemDetails">
+            <h3>Item Details</h3>
+            <p><strong>Category:</strong> <span id="dispCategory"></span></p>
+            <p><strong>Current Status:</strong> <span id="dispStatus" class="status-badge"></span></p>
+            <p id="dispAssignment" style="display: none; color: #555;">
+                Currently assigned to: <strong id="dispEmp"></strong> (<span id="dispOffice"></span>)
+            </p>
+        </div>
+
+        <div id="issueFormDiv">
+            <h3>Assign to Employee</h3>
+            <form id="issueForm">
+                <div class="form-group">
+                    <label for="assignTo">Employee ID</label>
+                    <input type="text" id="assignTo" placeholder="e.g., EMP-105" required>
+                </div>
+                <div class="form-group">
+                    <label for="office">University Office / Department</label>
+                    <input type="text" id="office" placeholder="e.g., Computer Science Dept" required>
+                </div>
+                <button type="submit" id="issueBtn" style="background-color: #27ae60;">Assign & Log Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const userSession = sessionStorage.getItem("currentUser");
+        if (!userSession) window.location.href = "index.html";
+        const user = JSON.parse(userSession);
+
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzXWpnrs3-G0kaf5Ky4VahtYONCcpq04mE6s4W-PZlDKhZaSRHl8xULFSxLW9G1eX3n/exec";
+
+        // 1. SMART URL SCANNER: Check if the user arrived here by scanning a QR code
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const scannedAsset = urlParams.get('asset');
+            
+            if (scannedAsset) {
+                document.getElementById('assetTag').value = scannedAsset;
+                // Automatically look it up so the user doesn't even have to click!
+                triggerLookup(); 
+            }
+        };
+
+        // 2. Fetch the item details from the database
+        async function triggerLookup() {
+            const assetTag = document.getElementById('assetTag').value.toUpperCase().trim();
+            const messageDiv = document.getElementById('message');
+            const detailsDiv = document.getElementById('itemDetails');
+            const issueDiv = document.getElementById('issueFormDiv');
+            const lookupBtn = document.getElementById('lookupBtn');
+
+            if (!assetTag) return;
+
+            messageDiv.style.color = "blue";
+            messageDiv.innerText = "Searching database...";
+            lookupBtn.disabled = true;
+            detailsDiv.style.display = "none";
+            issueDiv.style.display = "none";
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "scanItem", assetTag: assetTag }),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                });
+                
+                const result = await response.json();
+
+                if (result.success) {
+                    messageDiv.innerText = "";
+                    const item = result.data;
+
+                    // Populate details
+                    document.getElementById('dispCategory').innerText = item.category;
+                    
+                    const statusSpan = document.getElementById('dispStatus');
+                    statusSpan.innerText = item.status;
+                    
+                    if (item.status === "In Store") {
+                        statusSpan.className = "status-badge status-store";
+                        document.getElementById('dispAssignment').style.display = "none";
+                        // Show the assignment form because it's available!
+                        issueDiv.style.display = "block"; 
+                    } else {
+                        statusSpan.className = "status-badge status-issued";
+                        document.getElementById('dispEmp').innerText = item.assignedEmp;
+                        document.getElementById('dispOffice').innerText = item.assignedOffice;
+                        document.getElementById('dispAssignment').style.display = "block";
+                        // Do not show the issue form, as it is already assigned elsewhere.
+                        messageDiv.style.color = "orange";
+                        messageDiv.innerText = "This item is already assigned and not currently in the store.";
+                    }
+
+                    detailsDiv.style.display = "block";
+                } else {
+                    messageDiv.style.color = "red";
+                    messageDiv.innerText = result.message;
+                }
+            } catch (error) {
+                messageDiv.style.color = "red";
+                messageDiv.innerText = "Network Error. Please try again.";
+            }
+            lookupBtn.disabled = false;
+        }
+
+        // 3. Handle Form Submission to Issue the Item
+        document.getElementById('issueForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const assetTag = document.getElementById('assetTag').value.toUpperCase().trim();
+            const assignTo = document.getElementById('assignTo').value.trim();
+            const office = document.getElementById('office').value.trim();
+            const messageDiv = document.getElementById('message');
+            const issueBtn = document.getElementById('issueBtn');
+
+            messageDiv.style.color = "blue";
+            messageDiv.innerText = "Updating database and logging transaction...";
+            issueBtn.disabled = true;
+
+            const payload = {
+                action: "issueItem",
+                assetTag: assetTag,
+                assignTo: assignTo,
+                office: office,
+                userId: user.userId 
+            };
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                });
+                
+                const result = await response.json();
+
+                if (result.success) {
+                    messageDiv.style.color = "green";
+                    messageDiv.innerText = result.message;
+                    
+                    // Hide the form and update the visual status on screen
+                    document.getElementById('issueFormDiv').style.display = "none";
+                    document.getElementById('dispStatus').innerText = "Issued";
+                    document.getElementById('dispStatus').className = "status-badge status-issued";
+                    document.getElementById('dispEmp').innerText = assignTo;
+                    document.getElementById('dispOffice').innerText = office;
+                    document.getElementById('dispAssignment').style.display = "block";
+
+                } else {
+                    messageDiv.style.color = "red";
+                    messageDiv.innerText = "Error: " + result.message;
+                }
+            } catch (error) {
+                messageDiv.style.color = "red";
+                messageDiv.innerText = "Network Error. Check console.";
+            }
+            issueBtn.disabled = false;
+        });
+    </script>
+</body>
+</html>
