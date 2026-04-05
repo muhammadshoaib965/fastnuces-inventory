@@ -25,22 +25,34 @@
         button:disabled { background-color: #95a5a6; cursor: not-allowed; }
         
         .back-btn { background-color: #7f8c8d; margin-bottom: 20px; width: auto; }
-        
         #message { margin-top: 15px; font-weight: bold; text-align: center; }
         #reader { width: 100%; margin-bottom: 15px; display: none; border-radius: 8px; overflow: hidden; }
-
         #itemDetails { display: none; background-color: #ecf0f1; padding: 15px; border-radius: 4px; margin-top: 20px; border-left: 5px solid #2c3e50; }
         .status-badge { display: inline-block; padding: 5px 10px; border-radius: 15px; color: white; font-size: 12px; font-weight: bold; }
         .status-store { background-color: #27ae60; }
         .status-issued { background-color: #e67e22; }
-
         #issueFormDiv { display: none; margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
 
-        /* QR Reprint Area Styles */
-        #reprintArea { margin-top: 20px; text-align: center; background: #fff; padding: 15px; border: 1px dashed #ccc; border-radius: 4px; }
-        #reprintArea div { margin: 0 auto; display: flex; justify-content: center; }
+        /* PERFECTLY ALIGNED REPRINT AREA */
+        #reprintArea { 
+            margin-top: 20px; 
+            background: #fff; 
+            padding: 15px; 
+            border: 1px dashed #ccc; 
+            border-radius: 4px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        #reprintQrBox { display: flex; justify-content: center; }
+        #reprintTagText { 
+            font-weight: bold; 
+            margin-top: 4px; /* Reduced spacing */
+            margin-bottom: 0; 
+            font-size: 11px; /* Smaller font */
+            text-align: center; 
+        }
 
-        /* Print Media Query: Hide everything except the QR code when printing */
         @media print {
             body { background-color: white; padding: 0; }
             .no-print, .back-btn, #startScanBtn, #lookupBtn, h2, #issueFormDiv, .form-group { display: none !important; }
@@ -83,8 +95,8 @@
 
             <div id="reprintArea" style="display: none;">
                 <div id="reprintQrBox"></div>
-                <p id="reprintTagText" style="font-weight: bold; margin-top: 10px; margin-bottom: 0;"></p>
-                <button class="btn-primary no-print" style="width: auto; margin-top: 15px; padding: 5px 15px;" onclick="window.print()">🖨️ Print Replacement QR Label</button>
+                <p id="reprintTagText"></p>
+                <button class="btn-primary no-print" style="width: auto; margin-top: 15px; padding: 5px 15px;" onclick="window.print()">🖨️ Print Replacement Label</button>
             </div>
         </div>
 
@@ -215,18 +227,16 @@
                         document.getElementById('dispAssignment').style.display = "block";
                     }
 
-                    // --- NEW: Generate the QR Code for Reprinting ---
                     const reprintBox = document.getElementById('reprintQrBox');
-                    reprintBox.innerHTML = ""; // Clear old QR code
+                    reprintBox.innerHTML = ""; 
                     
-                    // Reconstruct the exact link that belongs in the QR Code
                     const baseUrl = window.location.href.split('?')[0];
                     const qrLink = baseUrl + "?asset=" + item.assetTag;
                     
-                    new QRCode(reprintBox, { text: qrLink, width: 120, height: 120, correctLevel : QRCode.CorrectLevel.H });
+                    // REDUCED QR CODE SIZE TO 80x80
+                    new QRCode(reprintBox, { text: qrLink, width: 80, height: 80, correctLevel : QRCode.CorrectLevel.H });
                     document.getElementById('reprintTagText').innerText = item.assetTag;
-                    document.getElementById('reprintArea').style.display = "block";
-                    // ------------------------------------------------
+                    document.getElementById('reprintArea').style.display = "flex";
 
                     detailsDiv.style.display = "block";
                 } else {
