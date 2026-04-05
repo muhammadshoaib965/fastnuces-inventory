@@ -18,14 +18,27 @@
         .back-btn { background-color: #7f8c8d; margin-bottom: 20px; width: auto; }
         
         #message { margin-top: 15px; font-weight: bold; text-align: center; }
-
-        /* Custom Category Box */
         #customPrefixDiv { display: none; background-color: #e8f4f8; padding: 15px; border-radius: 4px; margin-bottom: 15px; border: 1px solid #bce8f1; }
 
-        /* QR Code Display Grid */
-        #qrContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; margin-top: 30px; }
-        .qr-card { text-align: center; border: 1px dashed #ccc; padding: 15px; background: #fff; }
-        .qr-card p { margin-top: 10px; font-weight: bold; font-size: 14px; margin-bottom: 0; }
+        /* PERFECTLY ALIGNED QR CARDS */
+        #qrContainer { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 30px; justify-content: center; }
+        .qr-card { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            border: 1px dashed #ccc; 
+            padding: 10px; 
+            background: #fff; 
+            width: 100px; 
+        }
+        .qr-card p { 
+            margin-top: 4px; /* Reduced space between QR and text */
+            font-weight: bold; 
+            font-size: 11px; /* Smaller font size */
+            margin-bottom: 0; 
+            text-align: center; 
+        }
 
         #printBtn { background-color: #27ae60; display: none; margin-top: 20px; }
         #printBtn:hover { background-color: #2ecc71; }
@@ -35,7 +48,7 @@
             .no-print { display: none !important; }
             .container { box-shadow: none; padding: 0; }
             #qrContainer { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 10px; }
-            .qr-card { border: 1px solid #000; width: 120px; padding: 10px; margin-bottom: 10px; page-break-inside: avoid; }
+            .qr-card { border: 1px solid #000; width: 90px; padding: 8px; margin-bottom: 10px; page-break-inside: avoid; }
         }
     </style>
 </head>
@@ -47,19 +60,16 @@
         <h2 class="no-print">Receive New Items</h2>
         
         <form id="receiveForm" class="no-print">
-            
             <div class="form-group">
                 <label for="itemInput">Search Category (or type a new one)</label>
                 <input list="categoryList" id="itemInput" placeholder="Loading categories..." required autocomplete="off" disabled>
-                <datalist id="categoryList">
-                    </datalist>
+                <datalist id="categoryList"></datalist>
             </div>
 
             <div id="customPrefixDiv">
                 <div class="form-group">
                     <label for="customPrefix">Assign Prefix for New Item</label>
                     <input type="text" id="customPrefix" placeholder="e.g., WTR-DSPR" style="text-transform: uppercase;">
-                    <small style="color: #666;">Since this is a new item, please assign a short prefix code.</small>
                 </div>
             </div>
 
@@ -83,7 +93,6 @@
 
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzXWpnrs3-G0kaf5Ky4VahtYONCcpq04mE6s4W-PZlDKhZaSRHl8xULFSxLW9G1eX3n/exec";
 
-        // 1. Fetch categories from Google Sheet on page load
         window.onload = async function() {
             const itemInput = document.getElementById('itemInput');
             try {
@@ -102,22 +111,17 @@
                         datalist.appendChild(option);
                     });
                     itemInput.placeholder = "Type to search or add new...";
-                    itemInput.disabled = false; // Enable the input after data loads
+                    itemInput.disabled = false; 
                 }
             } catch (error) {
-                itemInput.placeholder = "Error loading database. Please refresh.";
-                console.error(error);
+                itemInput.placeholder = "Error loading database.";
             }
         };
 
-        // 2. Smart logic: Detect if the user is typing a brand new category
         document.getElementById('itemInput').addEventListener('input', function() {
             const val = this.value;
             const prefixDiv = document.getElementById('customPrefixDiv');
             const prefixInput = document.getElementById('customPrefix');
-            
-            // Existing items include the "|" character (e.g., "Tea Table | TBL-TEA")
-            // If the input has text but no "|", it's a new custom item!
             if (val.length > 0 && !val.includes("|")) {
                 prefixDiv.style.display = 'block';
                 prefixInput.required = true;
@@ -127,7 +131,6 @@
             }
         });
 
-        // 3. Handle Form Submission
         document.getElementById('receiveForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -139,8 +142,6 @@
             const printBtn = document.getElementById('printBtn');
 
             let category, prefix;
-
-            // Determine if it's a new item or existing based on the "|" separator
             if (!itemInput.includes("|")) {
                 category = itemInput.trim();
                 prefix = document.getElementById('customPrefix').value.toUpperCase().replace(/\s+/g, '-');
@@ -150,7 +151,7 @@
                 prefix = parts[1].trim();
             }
 
-            messageDiv.innerText = "Processing and connecting to database...";
+            messageDiv.innerText = "Processing...";
             messageDiv.style.color = "blue";
             btn.disabled = true;
             qrContainer.innerHTML = ""; 
@@ -182,7 +183,8 @@
                         card.className = "qr-card";
                         
                         const qrDiv = document.createElement("div");
-                        new QRCode(qrDiv, { text: item.qrLink, width: 100, height: 100, correctLevel : QRCode.CorrectLevel.H });
+                        // REDUCED QR CODE SIZE TO 80x80
+                        new QRCode(qrDiv, { text: item.qrLink, width: 80, height: 80, correctLevel : QRCode.CorrectLevel.H });
 
                         const tagText = document.createElement("p");
                         tagText.innerText = item.tag;
@@ -197,14 +199,13 @@
                     document.getElementById('receiveForm').reset();
                     document.getElementById('customPrefixDiv').style.display = 'none';
                     
-                    // Create a manual refresh button so the QR codes stay on screen until the user is done printing!
-const refreshBtn = document.createElement("button");
-refreshBtn.innerText = "🔄 Clear Screen & Receive More Items";
-refreshBtn.className = "no-print";
-refreshBtn.style.backgroundColor = "#3498db";
-refreshBtn.style.marginTop = "20px";
-refreshBtn.onclick = () => window.location.reload();
-qrContainer.insertAdjacentElement('afterend', refreshBtn); 
+                    const refreshBtn = document.createElement("button");
+                    refreshBtn.innerText = "🔄 Clear Screen & Receive More Items";
+                    refreshBtn.className = "no-print";
+                    refreshBtn.style.backgroundColor = "#3498db";
+                    refreshBtn.style.marginTop = "20px";
+                    refreshBtn.onclick = () => window.location.reload();
+                    qrContainer.insertAdjacentElement('afterend', refreshBtn);
 
                 } else {
                     messageDiv.style.color = "red";
@@ -213,7 +214,7 @@ qrContainer.insertAdjacentElement('afterend', refreshBtn);
                 }
             } catch (error) {
                 messageDiv.style.color = "red";
-                messageDiv.innerText = "Network Error. Check console.";
+                messageDiv.innerText = "Network Error.";
                 btn.disabled = false;
             }
         });
