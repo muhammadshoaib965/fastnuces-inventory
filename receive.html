@@ -197,8 +197,14 @@
                     document.getElementById('receiveForm').reset();
                     document.getElementById('customPrefixDiv').style.display = 'none';
                     
-                    // Force reload the page to refresh the category list so the newly added item shows up immediately
-                    setTimeout(() => { window.location.reload(); }, 5000); 
+                    // Create a manual refresh button so the QR codes stay on screen until the user is done printing!
+const refreshBtn = document.createElement("button");
+refreshBtn.innerText = "🔄 Clear Screen & Receive More Items";
+refreshBtn.className = "no-print";
+refreshBtn.style.backgroundColor = "#3498db";
+refreshBtn.style.marginTop = "20px";
+refreshBtn.onclick = () => window.location.reload();
+qrContainer.insertAdjacentElement('afterend', refreshBtn); 
 
                 } else {
                     messageDiv.style.color = "red";
