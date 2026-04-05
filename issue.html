@@ -13,7 +13,6 @@
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
         input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
         
-        /* Button Styles */
         button { color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
         .btn-primary { background-color: #2980b9; }
         .btn-primary:hover { background-color: #2471a3; }
@@ -27,17 +26,13 @@
         .back-btn { background-color: #7f8c8d; margin-bottom: 20px; width: auto; }
         
         #message { margin-top: 15px; font-weight: bold; text-align: center; }
-
-        /* Camera Scanner Div */
         #reader { width: 100%; margin-bottom: 15px; display: none; border-radius: 8px; overflow: hidden; }
 
-        /* Item Details Card */
         #itemDetails { display: none; background-color: #ecf0f1; padding: 15px; border-radius: 4px; margin-top: 20px; border-left: 5px solid #2c3e50; }
         .status-badge { display: inline-block; padding: 5px 10px; border-radius: 15px; color: white; font-size: 12px; font-weight: bold; }
         .status-store { background-color: #27ae60; }
         .status-issued { background-color: #e67e22; }
 
-        /* Issue Form Details */
         #issueFormDiv { display: none; margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
     </style>
 </head>
@@ -65,9 +60,11 @@
             <h3>Item Details</h3>
             <p><strong>Category:</strong> <span id="dispCategory"></span></p>
             <p><strong>Current Status:</strong> <span id="dispStatus" class="status-badge"></span></p>
-            <p id="dispAssignment" style="display: none; color: #555;">
-                Currently assigned to: <strong id="dispEmp"></strong> (<span id="dispOffice"></span>)
-            </p>
+            <div id="dispAssignment" style="display: none; color: #555; background: #fff; padding: 10px; border: 1px solid #ddd; margin-top: 10px; border-radius: 4px;">
+                <strong>Assigned To:</strong> <span id="dispEmpName"></span> (<span id="dispDesignation"></span>)<br>
+                <strong>Employee ID:</strong> <span id="dispEmp"></span><br>
+                <strong>Office:</strong> <span id="dispOffice"></span>
+            </div>
         </div>
 
         <div id="issueFormDiv">
@@ -78,8 +75,16 @@
                     <input type="text" id="assignTo" placeholder="e.g., EMP-105" required>
                 </div>
                 <div class="form-group">
+                    <label for="empName">Employee Name</label>
+                    <input type="text" id="empName" placeholder="e.g., Jane Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="designation">Designation / Title</label>
+                    <input type="text" id="designation" placeholder="e.g., Head of Admissions" required>
+                </div>
+                <div class="form-group">
                     <label for="office">University Office / Department</label>
-                    <input type="text" id="office" placeholder="e.g., Computer Science Dept" required>
+                    <input type="text" id="office" placeholder="e.g., Admissions Office" required>
                 </div>
                 <button type="submit" id="issueBtn" class="btn-success">Assign & Log Transaction</button>
             </form>
@@ -93,7 +98,6 @@
 
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzXWpnrs3-G0kaf5Ky4VahtYONCcpq04mE6s4W-PZlDKhZaSRHl8xULFSxLW9G1eX3n/exec";
 
-        // --- CAMERA SCANNER LOGIC ---
         let html5QrCode;
 
         function startScanner() {
@@ -103,32 +107,24 @@
 
             html5QrCode = new Html5Qrcode("reader");
             
-            // Start the camera. Uses back camera automatically on mobile phones.
             html5QrCode.start(
                 { facingMode: "environment" }, 
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText) => {
-                    // WHEN A QR CODE IS SUCCESSFULLY SCANNED:
-                    stopScanner(); // Stop the camera
-                    
-                    // Our QR codes contain full URLs. We need to extract just the asset tag.
+                    stopScanner();
                     let extractedTag = decodedText;
                     if (decodedText.includes('?asset=')) {
                         const urlParams = new URLSearchParams(decodedText.split('?')[1]);
                         extractedTag = urlParams.get('asset');
                     }
-                    
-                    // Put it in the box and look it up!
                     if (extractedTag) {
                         document.getElementById('assetTag').value = extractedTag;
                         triggerLookup();
                     }
                 },
-                (errorMessage) => {
-                    // Background errors while scanning for a code. We ignore these.
-                }
+                (errorMessage) => {}
             ).catch((err) => {
-                alert("Camera access denied or unavailable. Please check your browser permissions.");
+                alert("Camera access denied or unavailable.");
                 stopScanner();
             });
         }
@@ -143,7 +139,6 @@
             }
         }
 
-        // --- EXISTING LOOKUP LOGIC ---
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const scannedAsset = urlParams.get('asset');
@@ -191,8 +186,12 @@
                         issueDiv.style.display = "block"; 
                     } else {
                         statusSpan.className = "status-badge status-issued";
+                        // Populate new data fields
+                        document.getElementById('dispEmpName').innerText = item.assignedEmpName || "N/A";
+                        document.getElementById('dispDesignation').innerText = item.assignedDesignation || "N/A";
                         document.getElementById('dispEmp').innerText = item.assignedEmp;
                         document.getElementById('dispOffice').innerText = item.assignedOffice;
+                        
                         document.getElementById('dispAssignment').style.display = "block";
                         messageDiv.style.color = "orange";
                         messageDiv.innerText = "This item is already assigned and not currently in the store.";
@@ -215,7 +214,10 @@
             
             const assetTag = document.getElementById('assetTag').value.toUpperCase().trim();
             const assignTo = document.getElementById('assignTo').value.trim();
+            const empName = document.getElementById('empName').value.trim();
+            const designation = document.getElementById('designation').value.trim();
             const office = document.getElementById('office').value.trim();
+            
             const messageDiv = document.getElementById('message');
             const issueBtn = document.getElementById('issueBtn');
 
@@ -227,6 +229,8 @@
                 action: "issueItem",
                 assetTag: assetTag,
                 assignTo: assignTo,
+                empName: empName,
+                designation: designation,
                 office: office,
                 userId: user.userId 
             };
@@ -247,8 +251,12 @@
                     document.getElementById('issueFormDiv').style.display = "none";
                     document.getElementById('dispStatus').innerText = "Issued";
                     document.getElementById('dispStatus').className = "status-badge status-issued";
+                    
+                    document.getElementById('dispEmpName').innerText = empName;
+                    document.getElementById('dispDesignation').innerText = designation;
                     document.getElementById('dispEmp').innerText = assignTo;
                     document.getElementById('dispOffice').innerText = office;
+                    
                     document.getElementById('dispAssignment').style.display = "block";
                 } else {
                     messageDiv.style.color = "red";
