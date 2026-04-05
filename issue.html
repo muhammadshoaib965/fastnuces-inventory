@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Issue / Scan Asset</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -34,40 +35,60 @@
         .status-issued { background-color: #e67e22; }
 
         #issueFormDiv { display: none; margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
+
+        /* QR Reprint Area Styles */
+        #reprintArea { margin-top: 20px; text-align: center; background: #fff; padding: 15px; border: 1px dashed #ccc; border-radius: 4px; }
+        #reprintArea div { margin: 0 auto; display: flex; justify-content: center; }
+
+        /* Print Media Query: Hide everything except the QR code when printing */
+        @media print {
+            body { background-color: white; padding: 0; }
+            .no-print, .back-btn, #startScanBtn, #lookupBtn, h2, #issueFormDiv, .form-group { display: none !important; }
+            .container { box-shadow: none; padding: 0; border: none; }
+            #reprintArea { border: 1px solid #000; display: inline-block; padding: 10px; margin: 0; }
+            #itemDetails { border: none; background: transparent; padding: 0; }
+        }
     </style>
 </head>
 <body>
 
-    <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+    <button class="back-btn no-print" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
 
     <div class="container">
-        <h2>🔍 Scan or Enter Asset Tag</h2>
+        <h2 class="no-print">🔍 Scan or Enter Asset Tag</h2>
         
-        <button id="startScanBtn" class="btn-scan" onclick="startScanner()">📷 Open Camera to Scan QR</button>
-        <button id="stopScanBtn" class="btn-danger" onclick="stopScanner()">Stop Camera</button>
-        <div id="reader"></div>
+        <button id="startScanBtn" class="btn-scan no-print" onclick="startScanner()">📷 Open Camera to Scan QR</button>
+        <button id="stopScanBtn" class="btn-danger no-print" onclick="stopScanner()">Stop Camera</button>
+        <div id="reader" class="no-print"></div>
 
-        <div style="text-align: center; margin-bottom: 15px; font-weight: bold; color: #7f8c8d;">OR</div>
+        <div class="no-print" style="text-align: center; margin-bottom: 15px; font-weight: bold; color: #7f8c8d;">OR</div>
 
-        <div class="form-group">
+        <div class="form-group no-print">
             <input type="text" id="assetTag" placeholder="e.g., TBL-TEA-001" style="text-transform: uppercase;">
             <button onclick="triggerLookup()" id="lookupBtn" class="btn-primary">Look Up Item Manually</button>
         </div>
 
-        <div id="message"></div>
+        <div id="message" class="no-print"></div>
 
         <div id="itemDetails">
-            <h3>Item Details</h3>
-            <p><strong>Category:</strong> <span id="dispCategory"></span></p>
-            <p><strong>Current Status:</strong> <span id="dispStatus" class="status-badge"></span></p>
-            <div id="dispAssignment" style="display: none; color: #555; background: #fff; padding: 10px; border: 1px solid #ddd; margin-top: 10px; border-radius: 4px;">
+            <h3 class="no-print">Item Details</h3>
+            <p class="no-print"><strong>Category:</strong> <span id="dispCategory"></span></p>
+            <p class="no-print"><strong>Current Status:</strong> <span id="dispStatus" class="status-badge"></span></p>
+            
+            <div id="dispAssignment" class="no-print" style="display: none; color: #555; background: #fff; padding: 10px; border: 1px solid #ddd; margin-top: 10px; border-radius: 4px;">
                 <strong>Assigned To:</strong> <span id="dispEmpName"></span> (<span id="dispDesignation"></span>)<br>
                 <strong>Employee ID:</strong> <span id="dispEmp"></span><br>
                 <strong>Office:</strong> <span id="dispOffice"></span>
             </div>
+
+            <div id="reprintArea" style="display: none;">
+                <div id="reprintQrBox"></div>
+                <p id="reprintTagText" style="font-weight: bold; margin-top: 10px; margin-bottom: 0;"></p>
+                <button class="btn-primary no-print" style="width: auto; margin-top: 15px; padding: 5px 15px;" onclick="window.print()">🖨️ Print Replacement QR Label</button>
+            </div>
         </div>
 
-        <div id="issueFormDiv">
+        <div id="issueFormDiv" class="no-print">
             <h3>Assign to Employee</h3>
             <form id="issueForm">
                 <div class="form-group">
@@ -186,16 +207,26 @@
                         issueDiv.style.display = "block"; 
                     } else {
                         statusSpan.className = "status-badge status-issued";
-                        // Populate new data fields
                         document.getElementById('dispEmpName').innerText = item.assignedEmpName || "N/A";
                         document.getElementById('dispDesignation').innerText = item.assignedDesignation || "N/A";
                         document.getElementById('dispEmp').innerText = item.assignedEmp;
                         document.getElementById('dispOffice').innerText = item.assignedOffice;
                         
                         document.getElementById('dispAssignment').style.display = "block";
-                        messageDiv.style.color = "orange";
-                        messageDiv.innerText = "This item is already assigned and not currently in the store.";
                     }
+
+                    // --- NEW: Generate the QR Code for Reprinting ---
+                    const reprintBox = document.getElementById('reprintQrBox');
+                    reprintBox.innerHTML = ""; // Clear old QR code
+                    
+                    // Reconstruct the exact link that belongs in the QR Code
+                    const baseUrl = window.location.href.split('?')[0];
+                    const qrLink = baseUrl + "?asset=" + item.assetTag;
+                    
+                    new QRCode(reprintBox, { text: qrLink, width: 120, height: 120, correctLevel : QRCode.CorrectLevel.H });
+                    document.getElementById('reprintTagText').innerText = item.assetTag;
+                    document.getElementById('reprintArea').style.display = "block";
+                    // ------------------------------------------------
 
                     detailsDiv.style.display = "block";
                 } else {
