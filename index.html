@@ -1,85 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>University Inventory Login</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        button:hover { background-color: #1a252f; }
-        #message { margin-top: 15px; font-size: 14px; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>University Admin Office Inventory System</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg:#f3f6fb; --surface:#fff; --surface2:#f8fafc; --text:#172033; --muted:#667085;
+      --primary:#123c69; --primary2:#0b2b4d; --accent:#2e7dff; --success:#12805c; --warning:#b7791f; --danger:#c53030;
+      --border:#d8dee9; --shadow:0 14px 36px rgba(15,23,42,.10); --radius:18px;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    button,input,select,textarea{font:inherit} button{cursor:pointer}.hidden{display:none!important}.muted{color:var(--muted)}.small{font-size:12px}.right{text-align:right}
+    .auth-screen{min-height:100vh;display:grid;grid-template-columns:minmax(280px,470px) 1fr;background:linear-gradient(135deg,#0b2b4d 0%,#123c69 45%,#eef4ff 45%,#f7fbff 100%)}
+    .auth-panel{margin:auto;width:min(92vw,420px);background:var(--surface);border-radius:24px;padding:34px;box-shadow:var(--shadow)}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}.brand-mark{width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:#eaf2ff;color:var(--primary);font-weight:900}.brand h1{margin:0;font-size:20px;line-height:1.2}
+    .auth-hero{color:#fff;padding:8vw 7vw;display:flex;flex-direction:column;justify-content:center}.auth-hero h2{font-size:clamp(30px,4vw,58px);max-width:720px;margin:0 0 16px}.auth-hero p{max-width:620px;font-size:18px;line-height:1.65;opacity:.9}
+    .field{margin-bottom:14px}label{display:block;font-weight:800;margin-bottom:7px;font-size:13px;color:#344054}input,select,textarea{width:100%;border:1px solid var(--border);border-radius:12px;padding:11px 12px;background:#fff;outline:none;transition:border .15s,box-shadow .15s}textarea{min-height:86px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(46,125,255,.12)}
+    .btn{border:0;border-radius:12px;padding:11px 15px;background:var(--primary);color:#fff;font-weight:900;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;transition:transform .15s,background .15s,opacity .15s;text-decoration:none}.btn:hover{background:var(--primary2);transform:translateY(-1px)}.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}.btn.full{width:100%}.btn.secondary{background:#eef2f7;color:#263041}.btn.secondary:hover{background:#dde5ef}.btn.success{background:var(--success)}.btn.warning{background:var(--warning)}.btn.danger{background:var(--danger)}.btn.ghost{background:transparent;color:var(--primary);padding-inline:8px}.link-btn{border:0;background:transparent;color:var(--accent);font-weight:900;padding:6px}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.grid{display:grid;gap:16px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .app-shell{min-height:100vh;display:grid;grid-template-columns:290px 1fr}.sidebar{background:#0d2744;color:#d8e6f7;padding:22px 16px;position:sticky;top:0;min-height:100vh;z-index:20;overflow-y:auto}.side-brand{display:flex;align-items:center;gap:12px;padding:8px 8px 18px}.side-brand .brand-mark{background:rgba(255,255,255,.1);color:#fff}.side-brand strong{color:#fff;display:block}.side-brand span{color:#aac1da;font-size:12px}.nav{display:grid;gap:7px}.nav button{width:100%;border:0;color:#d8e6f7;background:transparent;padding:12px 13px;border-radius:14px;text-align:left;display:flex;gap:10px;align-items:center;font-weight:850}.nav button:hover,.nav button.active{background:rgba(255,255,255,.12);color:#fff}.nav .divider{height:1px;background:rgba(255,255,255,.12);margin:7px 4px}.content{min-width:0}.topbar{height:72px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:10}.topbar h2{margin:0;font-size:20px}.mobile-menu{display:none}.main{padding:26px;max-width:1480px}.view{display:none}.view.active{display:block}.card{background:var(--surface);border:1px solid rgba(216,222,233,.9);border-radius:var(--radius);padding:20px;box-shadow:0 4px 16px rgba(15,23,42,.05)}.card h3{margin:0 0 14px;font-size:17px}.stat-card{display:flex;flex-direction:column;gap:8px;min-height:116px}.stat-label{color:var(--muted);font-weight:900;font-size:13px}.stat-value{font-size:32px;font-weight:950;letter-spacing:-1px}.section-title{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:16px}.section-title h2{margin:0;font-size:24px}.section-title p{margin:4px 0 0;color:var(--muted)}.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;font-size:12px;font-weight:950;white-space:nowrap}.badge.store{background:#e7f8ef;color:#08714f}.badge.assigned{background:#fff3dc;color:#98620a}.badge.repair{background:#eaf2ff;color:#174ea6}.badge.missing,.badge.disposed,.badge.damaged{background:#fff1f1;color:#a51f1f}.badge.neutral{background:#edf0f5;color:#667085}
+    .table-wrap{width:100%;overflow-x:auto;border:1px solid var(--border);border-radius:16px}table{width:100%;border-collapse:collapse;background:#fff;min-width:760px}th,td{padding:12px 13px;border-bottom:1px solid #edf0f5;text-align:left;vertical-align:top;font-size:14px}th{background:#f8fafc;font-size:12px;color:#475467;text-transform:uppercase;letter-spacing:.04em}tr:last-child td{border-bottom:0}.notice{padding:13px 14px;border-radius:14px;background:#eef7ff;color:#144e7a;border:1px solid #c9e7ff;margin:12px 0}.notice.success{background:#ecfdf3;border-color:#b9f6d3;color:#08714f}.notice.danger{background:#fff1f1;border-color:#ffd1d1;color:#a51f1f}.notice.warning{background:#fff8e8;border-color:#f9e0a1;color:#98620a}#toast{position:fixed;right:20px;bottom:20px;max-width:420px;background:#101828;color:white;padding:14px 16px;border-radius:14px;box-shadow:var(--shadow);z-index:50}#reader{width:100%;min-height:280px;border-radius:16px;overflow:hidden;border:1px solid var(--border);display:none;background:#000}.asset-panel{border-left:5px solid var(--primary)}.qr-list{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}.qr-card{width:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px dashed #98a2b3;border-radius:14px;padding:10px;background:#fff}.qr-card p{font-weight:950;font-size:11px;margin:4px 0 0;text-align:center}.pill-list{display:flex;gap:8px;flex-wrap:wrap}.pill{background:#f2f4f7;border:1px solid #e4e7ec;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tabs button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 12px;font-weight:800}.tabs button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    @media (max-width:980px){.auth-screen{grid-template-columns:1fr;background:#f7fbff}.auth-hero{display:none}.app-shell{display:block}.sidebar{position:fixed;left:-310px;width:290px;transition:left .2s}.sidebar.open{left:0}.mobile-menu{display:inline-flex}.main{padding:18px}.topbar{padding:0 14px}.grid.two,.grid.three,.grid.four{grid-template-columns:1fr}.section-title{align-items:flex-start;flex-direction:column}}
+    @media print{body{background:white}.sidebar,.topbar,.no-print,.btn,.link-btn{display:none!important}.app-shell{display:block}.main{padding:0}.card{box-shadow:none;border:0}.qr-card{border:1px solid #000;break-inside:avoid}}
+  </style>
 </head>
 <body>
-
-    <div class="login-box">
-        <h2>System Login</h2>
-        <form id="loginForm">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit" id="loginBtn">Login</button>
-        </form>
-        <div id="message"></div>
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-panel">
+      <div class="brand"><div class="brand-mark">UI</div><div><h1>University Inventory</h1><div class="muted small">Admin Office Asset Records</div></div></div>
+      <form id="loginForm">
+        <h2>Login</h2>
+        <div class="field"><label>Email</label><input id="loginEmail" type="email" required placeholder="admin@university.edu"></div>
+        <div class="field"><label>Password</label><input id="loginPassword" type="password" required></div>
+        <button class="btn full" type="submit">Login</button>
+        <button class="link-btn" type="button" onclick="showReset(true)">Forgot password?</button>
+      </form>
+      <form id="resetForm" class="hidden">
+        <h2>Password Reset</h2>
+        <div class="field"><label>Email</label><input id="resetEmail" type="email" required></div>
+        <button class="btn secondary full" type="button" onclick="requestResetCode()">Send Verification Code</button>
+        <div class="field"><label>Verification Code</label><input id="resetCode" inputmode="numeric" placeholder="6-digit code"></div>
+        <div class="field"><label>New Password</label><input id="resetNewPassword" type="password" placeholder="Minimum 8 characters"></div>
+        <button class="btn full" type="submit">Reset Password</button>
+        <button class="link-btn" type="button" onclick="showReset(false)">Back to login</button>
+      </form>
+      <div id="authMsg"></div>
     </div>
+    <div class="auth-hero">
+      <h2>Organize university assets with QR records, transfers, maintenance, and reports.</h2>
+      <p>This system is designed for admin office inventory control — not students, not dues, not fines. It keeps a clean record of every asset from purchase/receiving to assignment, transfer, repair, audit, and disposal.</p>
+    </div>
+  </div>
 
-    <script>
-        // Your Google Apps Script Web App URL
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzXWpnrs3-G0kaf5Ky4VahtYONCcpq04mE6s4W-PZlDKhZaSRHl8xULFSxLW9G1eX3n/exec";
+  <div id="appShell" class="app-shell hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="side-brand"><div class="brand-mark">UI</div><div><strong>University Inventory</strong><span id="sideUser">Admin</span></div></div>
+      <nav id="nav" class="nav">
+        <button data-view="dashboard" class="active">📊 Dashboard</button>
+        <button data-view="receive">📦 Receive Assets</button>
+        <button data-view="scan">🔎 Scan / Issue / Return</button>
+        <button data-view="transfer">🔁 Transfer Asset</button>
+        <button data-view="clearance">✅ Search / Clearance</button>
+        <div class="divider"></div>
+        <button data-view="offices">🏢 Offices / Departments</button>
+        <button data-view="staff">👥 Staff Records</button>
+        <button data-view="locations">📍 Locations / Rooms</button>
+        <button data-view="suppliers">🧾 Suppliers / Purchase</button>
+        <div class="divider"></div>
+        <button data-view="maintenance">🛠️ Maintenance / Missing</button>
+        <button data-view="disposal">🗑️ Disposal / Write-off</button>
+        <button data-view="reports">📑 Reports / Export</button>
+        <button data-view="import">⬆️ Bulk Import</button>
+        <div class="divider"></div>
+        <button data-view="attachments">📎 Attachments</button>
+        <button data-view="users" data-super="1">🔐 User Management</button>
+        <button data-view="activity">🧭 Activity Log</button>
+        <button data-view="settings">⚙️ Settings</button>
+      </nav>
+    </aside>
+    <section class="content">
+      <header class="topbar">
+        <div class="row"><button class="btn secondary mobile-menu" onclick="toggleSidebar()">☰</button><h2 id="pageTitle">Dashboard</h2></div>
+        <div class="row"><span id="topUser" class="muted small"></span><button class="btn secondary no-print" onclick="logout()">Logout</button></div>
+      </header>
+      <main class="main">
+        <section id="dashboard" class="view active">
+          <div class="section-title"><div><h2>Dashboard</h2><p>Live summary of university office inventory.</p></div><button class="btn secondary no-print" onclick="refreshAll()">Refresh</button></div>
+          <div id="statsGrid" class="grid four"></div>
+          <div class="grid two" style="margin-top:16px">
+            <div class="card"><h3>Recent Transactions</h3><div id="recentTxns"></div></div>
+            <div class="card"><h3>Status Summary</h3><div id="statusSummary" class="pill-list"></div></div>
+          </div>
+        </section>
 
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); 
-            
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            const messageDiv = document.getElementById('message');
-            const btn = document.getElementById('loginBtn');
+        <section id="receive" class="view">
+          <div class="section-title"><div><h2>Receive New Assets</h2><p>Add purchased/received items and print QR labels.</p></div><button class="btn secondary no-print" onclick="window.print()">Print Labels</button></div>
+          <div class="card">
+            <form id="receiveForm" class="grid two">
+              <div class="field"><label>Category</label><input list="categoryList" id="recCategory" required placeholder="e.g. Office Chair"></div>
+              <div class="field"><label>Prefix</label><input id="recPrefix" required placeholder="e.g. CHR" style="text-transform:uppercase"></div>
+              <div class="field"><label>Quantity</label><input id="recQuantity" type="number" min="1" max="500" value="1" required></div>
+              <div class="field"><label>Condition</label><select id="recCondition"></select></div>
+              <div class="field"><label>Description</label><input id="recDescription" placeholder="Asset description"></div>
+              <div class="field"><label>Brand</label><input id="recBrand"></div>
+              <div class="field"><label>Model</label><input id="recModel"></div>
+              <div class="field"><label>Serial No</label><input id="recSerialNo"></div>
+              <div class="field"><label>Supplier</label><select id="recSupplier"><option value="">-- Select Supplier --</option></select></div>
+              <div class="field"><label>Purchase Date</label><input id="recPurchaseDate" type="date"></div>
+              <div class="field"><label>Purchase Price</label><input id="recPurchasePrice" type="number" step="0.01"></div>
+              <div class="field"><label>Invoice No</label><input id="recInvoiceNo"></div>
+              <div class="field"><label>Warranty Expiry</label><input id="recWarrantyExpiry" type="date"></div>
+              <div class="field"><label>Office</label><select id="recOffice"><option value="">-- Optional --</option></select></div>
+              <div class="field"><label>Location / Room</label><select id="recLocation"><option value="">-- Optional --</option></select></div>
+              <div class="field"><label>Invoice URL</label><input id="recInvoiceUrl" type="url" placeholder="Optional Google Drive link"></div>
+              <div class="field"><label>Photo URL</label><input id="recPhotoUrl" type="url" placeholder="Optional image link"></div>
+              <div class="field" style="grid-column:1/-1"><label>Remarks</label><textarea id="recRemarks"></textarea></div>
+              <div style="grid-column:1/-1"><button class="btn success" type="submit">Add to Inventory & Generate QR</button></div>
+            </form>
+            <datalist id="categoryList"></datalist>
+            <div id="qrOutput" class="qr-list"></div>
+          </div>
+        </section>
 
-            messageDiv.innerText = "Authenticating...";
-            messageDiv.style.color = "blue";
-            btn.disabled = true;
+        <section id="scan" class="view">
+          <div class="section-title"><div><h2>Scan / Issue / Return</h2><p>Scan QR code or enter asset tag to manage an item.</p></div></div>
+          <div class="grid two">
+            <div class="card">
+              <h3>Find Asset</h3>
+              <button id="startScanBtn" class="btn secondary full" onclick="startScanner()">📷 Open Camera Scanner</button>
+              <button id="stopScanBtn" class="btn danger full hidden" onclick="stopScanner()">Stop Camera</button>
+              <div id="reader"></div>
+              <div class="field"><label>Asset Tag</label><input id="lookupAssetTag" placeholder="e.g. CHR-0001" style="text-transform:uppercase"></div>
+              <button class="btn full" onclick="lookupAsset()">Look Up Asset</button>
+            </div>
+            <div id="assetBox" class="card asset-panel"><h3>Asset Details</h3><p class="muted">Search an asset to view details.</p></div>
+          </div>
+          <div class="grid two" style="margin-top:16px">
+            <div class="card"><h3>Assign Asset</h3><form id="assignForm" class="grid two"><div class="field"><label>Employee</label><select id="assignEmployee"><option value="">-- Optional --</option></select></div><div class="field"><label>Office</label><select id="assignOffice"><option value="">-- Optional --</option></select></div><div class="field"><label>Location</label><select id="assignLocation"><option value="">-- Optional --</option></select></div><div class="field"><label>Remarks</label><input id="assignRemarks"></div><div style="grid-column:1/-1"><button class="btn success" type="submit">Assign / Issue</button></div></form></div>
+            <div class="card"><h3>Return / Status</h3><form id="returnForm" class="grid two"><div class="field"><label>Store Office</label><select id="returnOffice"><option value="">-- Keep Current --</option></select></div><div class="field"><label>Store Location</label><select id="returnLocation"><option value="">-- Keep Current --</option></select></div><div class="field"><label>Remarks</label><input id="returnRemarks"></div><div class="row"><button class="btn" type="submit">Return to Store</button><button class="btn warning" type="button" onclick="markCurrent('Missing')">Mark Missing</button><button class="btn danger" type="button" onclick="markCurrent('Damaged')">Mark Damaged</button></div></form></div>
+          </div>
+        </section>
 
-            const payload = {
-                action: "login",
-                username: user,
-                password: pass
-            };
+        <section id="transfer" class="view">
+          <div class="section-title"><div><h2>Transfer Asset</h2><p>Move an assigned asset to another employee, office, or room.</p></div></div>
+          <div class="card"><form id="transferForm" class="grid two"><div class="field"><label>Asset Tag</label><input id="trAssetTag" required style="text-transform:uppercase"></div><div></div><div class="field"><label>To Employee</label><select id="trEmployee"><option value="">-- Optional --</option></select></div><div class="field"><label>To Office</label><select id="trOffice"><option value="">-- Optional --</option></select></div><div class="field"><label>To Location</label><select id="trLocation"><option value="">-- Optional --</option></select></div><div class="field"><label>Remarks</label><input id="trRemarks"></div><div style="grid-column:1/-1"><button class="btn success" type="submit">Transfer Asset</button></div></form></div>
+        </section>
 
-            try {
-                // Using text/plain avoids CORS preflight issues with Google Apps Script
-                const response = await fetch(WEB_APP_URL, {
-                    method: "POST",
-                    body: JSON.stringify(payload),
-                    headers: {
-                        "Content-Type": "text/plain;charset=utf-8"
-                    }
-                });
-                
-                const result = await response.json();
+        <section id="clearance" class="view">
+          <div class="section-title"><div><h2>Search / Clearance</h2><p>Check assigned assets by employee ID.</p></div><button class="btn secondary no-print" onclick="window.print()">Print Clearance</button></div>
+          <div class="card"><div class="row"><div class="field" style="flex:1;min-width:240px"><label>Employee ID</label><input id="clearEmpId" placeholder="e.g. EMP-105"></div><button class="btn" onclick="searchClearance()">Search</button></div><div id="clearanceResult"></div></div>
+        </section>
 
-                if (result.success) {
-                    messageDiv.style.color = "green";
-                    messageDiv.innerText = "Login successful! Redirecting...";
-                    
-                    // Save user info in the browser's session storage
-                    sessionStorage.setItem("currentUser", JSON.stringify(result.data));
-                    
-                    // Redirect to the dashboard
-                    window.location.href = "dashboard.html";
-                } else {
-                    messageDiv.style.color = "red";
-                    messageDiv.innerText = result.message;
-                    btn.disabled = false;
-                }
-            } catch (error) {
-                messageDiv.style.color = "red";
-                messageDiv.innerText = "Network Error. Check console.";
-                console.error(error);
-                btn.disabled = false;
-            }
-        });
-    </script>
+        <section id="offices" class="view master-view" data-master="offices"><div class="section-title"><div><h2>Offices / Departments</h2><p>Manage university offices and departments.</p></div></div><div class="grid two"><div class="card"><h3>Add Office</h3><form id="officeForm" class="grid"><input type="hidden" id="officeId"><div class="field"><label>Office Name</label><input id="officeName" required></div><div class="field"><label>Department</label><input id="officeDepartment"></div><div class="field"><label>Head Name</label><input id="officeHead"></div><div class="field"><label>Contact</label><input id="officeContact"></div><div class="field"><label>Remarks</label><textarea id="officeRemarks"></textarea></div><button class="btn success" type="submit">Save Office</button></form></div><div class="card"><h3>Office List</h3><div id="officeTable"></div></div></div></section>
+
+        <section id="staff" class="view"><div class="section-title"><div><h2>Staff Records</h2><p>Staff details are used only for assigning/admin tracking assets.</p></div></div><div class="grid two"><div class="card"><h3>Add Staff</h3><form id="staffForm" class="grid"><input type="hidden" id="staffId"><div class="field"><label>Employee ID</label><input id="staffEmpId" required></div><div class="field"><label>Name</label><input id="staffName" required></div><div class="field"><label>Designation</label><input id="staffDesignation"></div><div class="field"><label>Office</label><select id="staffOffice"><option value="">-- Select Office --</option></select></div><div class="field"><label>Phone</label><input id="staffPhone"></div><div class="field"><label>Email</label><input id="staffEmail" type="email"></div><div class="field"><label>Remarks</label><textarea id="staffRemarks"></textarea></div><button class="btn success" type="submit">Save Staff</button></form></div><div class="card"><h3>Staff List</h3><div id="staffTable"></div></div></div></section>
+
+        <section id="locations" class="view"><div class="section-title"><div><h2>Location / Room Management</h2><p>Track building, floor, room, and related office.</p></div></div><div class="grid two"><div class="card"><h3>Add Location</h3><form id="locationForm" class="grid"><input type="hidden" id="locationId"><div class="field"><label>Building</label><input id="locBuilding" required></div><div class="field"><label>Floor</label><input id="locFloor"></div><div class="field"><label>Room</label><input id="locRoom" required></div><div class="field"><label>Office</label><select id="locOffice"><option value="">-- Optional --</option></select></div><div class="field"><label>Remarks</label><textarea id="locRemarks"></textarea></div><button class="btn success" type="submit">Save Location</button></form></div><div class="card"><h3>Location List</h3><div id="locationTable"></div></div></div></section>
+
+        <section id="suppliers" class="view"><div class="section-title"><div><h2>Supplier / Purchase Records</h2><p>Manage supplier information used during receiving.</p></div></div><div class="grid two"><div class="card"><h3>Add Supplier</h3><form id="supplierForm" class="grid"><input type="hidden" id="supplierId"><div class="field"><label>Supplier Name</label><input id="supplierName" required></div><div class="field"><label>Contact Person</label><input id="supplierContactPerson"></div><div class="field"><label>Phone</label><input id="supplierPhone"></div><div class="field"><label>Email</label><input id="supplierEmail" type="email"></div><div class="field"><label>Address</label><textarea id="supplierAddress"></textarea></div><div class="field"><label>NTN / Tax No</label><input id="supplierNtn"></div><button class="btn success" type="submit">Save Supplier</button></form></div><div class="card"><h3>Supplier List</h3><div id="supplierTable"></div></div></div></section>
+
+        <section id="maintenance" class="view"><div class="section-title"><div><h2>Maintenance / Damage / Missing</h2><p>Record repair, damage, or missing status without any fine/recovery logic.</p></div></div><div class="grid two"><div class="card"><h3>Open Maintenance Record</h3><form id="maintForm" class="grid"><div class="field"><label>Asset Tag</label><input id="maintAssetTag" required style="text-transform:uppercase"></div><div class="field"><label>Type</label><select id="maintType"><option>Repair</option><option>Service</option><option>Damage</option><option>Inspection</option></select></div><div class="field"><label>Vendor / Workshop</label><input id="maintVendor"></div><div class="field"><label>Estimated/Actual Cost</label><input id="maintCost" type="number" step="0.01"></div><div class="field"><label>Sent Date</label><input id="maintSentDate" type="date"></div><div class="field"><label>Expected Return Date</label><input id="maintReturnDate" type="date"></div><div class="field" style="grid-column:1/-1"><label>Issue Details</label><textarea id="maintIssue"></textarea></div><button class="btn success" type="submit">Create Maintenance Record</button></form></div><div class="card"><h3>Maintenance Records</h3><div class="row"><button class="btn secondary" onclick="loadMaintenance()">Refresh</button></div><div id="maintTable"></div></div></div></section>
+
+        <section id="disposal" class="view"><div class="section-title"><div><h2>Disposal / Write-off</h2><p>Officially remove old, broken, or disposed assets.</p></div></div><div class="grid two"><div class="card"><h3>Record Disposal</h3><form id="disposalForm" class="grid"><div class="field"><label>Asset Tag</label><input id="dispAssetTag" required style="text-transform:uppercase"></div><div class="field"><label>Method</label><select id="dispMethod"><option>Write-off</option><option>Disposed</option><option>Auction</option><option>Transferred Out</option><option>Scrap</option></select></div><div class="field"><label>Approved By</label><input id="dispApprovedBy"></div><div class="field"><label>Disposal Date</label><input id="dispDate" type="date"></div><div class="field"><label>Value / Amount</label><input id="dispValue" type="number" step="0.01"></div><div class="field"><label>Approval File URL</label><input id="dispFileUrl" type="url"></div><div class="field" style="grid-column:1/-1"><label>Reason</label><textarea id="dispReason"></textarea></div><button class="btn danger" type="submit">Record Disposal</button></form></div><div class="card"><h3>Disposal Records</h3><button class="btn secondary" onclick="loadDisposals()">Refresh</button><div id="disposalTable"></div></div></div></section>
+
+        <section id="reports" class="view"><div class="section-title"><div><h2>Reports & Export</h2><p>Generate official inventory reports and export CSV.</p></div><button class="btn secondary no-print" onclick="window.print()">Print Report</button></div><div class="card"><div class="row"><div class="field" style="min-width:260px"><label>Report Type</label><select id="reportType"><option value="inventory">All Inventory</option><option value="assigned">Assigned Assets</option><option value="instore">In Store Assets</option><option value="maintenance">Maintenance</option><option value="disposal">Disposal / Write-off</option><option value="transactions">Transactions</option><option value="staff">Staff</option><option value="offices">Offices</option><option value="locations">Locations</option><option value="suppliers">Suppliers</option></select></div><button class="btn" onclick="loadReport()">Generate</button><button class="btn success" onclick="exportCurrentReport()">Export CSV</button></div><div id="reportMeta" class="muted small"></div><div id="reportTable"></div></div></section>
+
+        <section id="import" class="view"><div class="section-title"><div><h2>Bulk Import</h2><p>Paste old inventory records from Excel/CSV.</p></div></div><div class="card"><div class="notice">Required columns: <b>Category</b> and <b>Prefix</b>. Optional columns: AssetTag, Description, Brand, Model, SerialNo, Condition, Status, Office, Location, EmployeeID, EmployeeName, SupplierName, PurchaseDate, PurchasePrice, InvoiceNo, WarrantyExpiry, Remarks.</div><div class="field"><label>CSV Text</label><textarea id="importCsv" style="min-height:220px" placeholder="Category,Prefix,Description,Brand,Model,SerialNo,Condition,Status\nOffice Chair,CHR,Executive Chair,,,,Good,In Store"></textarea></div><button class="btn success" onclick="bulkImport()">Import CSV</button><div id="importResult"></div></div></section>
+
+        <section id="attachments" class="view"><div class="section-title"><div><h2>Attachments</h2><p>Upload invoice, warranty card, purchase order, approval file, or item photo.</p></div></div><div class="card"><form id="attachmentForm" class="grid two"><div class="field"><label>Asset Tag</label><input id="attAssetTag" style="text-transform:uppercase" placeholder="Optional, but recommended"></div><div class="field"><label>Type</label><select id="attType"><option>Invoice</option><option>Photo</option><option>Warranty</option><option>Purchase Order</option><option>Approval</option><option>Other</option></select></div><div class="field"><label>File</label><input id="attFile" type="file" required></div><div class="field"><label>Remarks</label><input id="attRemarks"></div><div style="grid-column:1/-1"><button class="btn success" type="submit">Upload Attachment</button></div></form><div id="attachmentResult"></div></div></section>
+
+        <section id="users" class="view"><div class="section-title"><div><h2>User Management</h2><p>Create admins and viewers. SuperAdmin only.</p></div></div><div class="grid two"><div class="card"><h3>Add / Update User</h3><form id="userForm" class="grid"><input type="hidden" id="userIdField"><div class="field"><label>Name</label><input id="newUserName" required></div><div class="field"><label>Email</label><input id="newUserEmail" type="email" required></div><div class="field"><label>Role</label><select id="newUserRole"><option>InventoryAdmin</option><option>Viewer</option><option>SuperAdmin</option></select></div><div class="field"><label>Password</label><input id="newUserPassword" type="password" placeholder="Leave blank when updating"></div><button class="btn success" type="submit">Save User</button></form></div><div class="card"><h3>User List</h3><button class="btn secondary" onclick="loadUsers()">Refresh</button><div id="userTable"></div></div></div></section>
+
+        <section id="activity" class="view"><div class="section-title"><div><h2>Activity Log</h2><p>Audit trail of system actions.</p></div><button class="btn secondary" onclick="loadActivity()">Refresh</button></div><div class="card"><div id="activityTable"></div></div></section>
+
+        <section id="settings" class="view"><div class="section-title"><div><h2>Settings</h2><p>Account and system settings.</p></div></div><div class="grid two"><div class="card"><h3>Change Password</h3><form id="changePasswordForm"><div class="field"><label>Current Password</label><input id="currentPassword" type="password" required></div><div class="field"><label>New Password</label><input id="newPassword" type="password" required></div><button class="btn" type="submit">Change Password</button></form></div><div class="card"><h3>System Note</h3><p>This package has no fine, recovery, due date, or student-related module. It is designed for admin office inventory record management.</p><p class="muted small">Recommended roles: SuperAdmin for full access, InventoryAdmin for operations, Viewer for read-only reports.</p></div></div></section>
+      </main>
+    </section>
+  </div>
+  <div id="toast" class="hidden"></div>
+
+  <script>
+    const WEB_APP_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+    let currentUser = null, bootstrap = {}, currentAsset = null, html5QrCode = null, currentReportRows = [];
+    const pendingAssetParam = new URLSearchParams(location.search).get('asset');
+
+    const $ = id => document.getElementById(id);
+    const val = id => ($(id)?.value || '').trim();
+    const setMsg = (id, msg, type='') => { const el=$(id); if(el) el.innerHTML = msg ? `<div class="notice ${type}">${msg}</div>` : ''; };
+    const toast = msg => { const t=$('toast'); t.textContent=msg; t.classList.remove('hidden'); clearTimeout(window.toastTimer); window.toastTimer=setTimeout(()=>t.classList.add('hidden'),3500); };
+    const esc = s => String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const fmtStatus = s => { const cls = s==='In Store'?'store':s==='Assigned'?'assigned':s==='Under Repair'?'repair':(s==='Missing'||s==='Disposed'||s==='Damaged')?s.toLowerCase():'neutral'; return `<span class="badge ${cls}">${esc(s||'')}</span>`; };
+    const actionPayload = payload => Object.assign({}, payload || {}, currentUser ? { userId: currentUser.userId, sessionToken: currentUser.sessionToken } : {});
+
+    async function api(action, payload={}) {
+      if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR')) throw new Error('Please paste your Google Apps Script Web App URL inside index.html.');
+      const res = await fetch(WEB_APP_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(actionPayload(Object.assign({action}, payload))) });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || 'Request failed.');
+      return json.data;
+    }
+
+    function showReset(show){ $('loginForm').classList.toggle('hidden',show); $('resetForm').classList.toggle('hidden',!show); $('authMsg').innerHTML=''; }
+    $('loginForm').addEventListener('submit', async e => { e.preventDefault(); setMsg('authMsg','Authenticating...'); try { const data = await api('login',{email:val('loginEmail'),password:val('loginPassword')}); currentUser=data; sessionStorage.setItem('currentUser',JSON.stringify(data)); openApp(); } catch(err){ setMsg('authMsg',esc(err.message),'danger'); }});
+    async function requestResetCode(){ setMsg('authMsg','Sending verification code...'); try{ await api('requestPasswordReset',{email:val('resetEmail')}); setMsg('authMsg','If this email exists, a reset code has been sent.','success'); }catch(err){ setMsg('authMsg',esc(err.message),'danger'); }}
+    $('resetForm').addEventListener('submit', async e => { e.preventDefault(); try{ await api('resetPassword',{email:val('resetEmail'),code:val('resetCode'),newPassword:val('resetNewPassword')}); setMsg('authMsg','Password updated. Please login now.','success'); showReset(false); }catch(err){ setMsg('authMsg',esc(err.message),'danger'); }});
+    function logout(){ sessionStorage.removeItem('currentUser'); currentUser=null; location.href=location.pathname; }
+
+    async function openApp(){
+      $('authScreen').classList.add('hidden'); $('appShell').classList.remove('hidden');
+      $('topUser').textContent = `${currentUser.name} • ${currentUser.role}`; $('sideUser').textContent = `${currentUser.name} • ${currentUser.role}`;
+      document.querySelectorAll('[data-super]').forEach(b=>b.style.display = currentUser.role === 'SuperAdmin' ? 'flex' : 'none');
+      await refreshAll();
+      if (pendingAssetParam) { showView('scan','Scan / Issue / Return'); $('lookupAssetTag').value = pendingAssetParam; await lookupAsset(); }
+    }
+
+    async function refreshAll(){ await loadBootstrap(); await loadDashboard(); renderMasters(); }
+    async function loadBootstrap(){ bootstrap = await api('getBootstrap'); populateAllSelects(); }
+    function populateSelect(id, rows, valueKey, labelFn, first='-- Select --') { const el=$(id); if(!el) return; const old=el.value; el.innerHTML = first!==null ? `<option value="">${first}</option>` : ''; rows.forEach(r=>{ const opt=document.createElement('option'); opt.value=r[valueKey] || ''; opt.textContent=labelFn(r); el.appendChild(opt); }); if(old) el.value=old; }
+    function populateAllSelects(){
+      const cats=bootstrap.categories||[], offices=bootstrap.offices||[], staff=bootstrap.staff||[], locs=bootstrap.locations||[], sups=bootstrap.suppliers||[];
+      const dl=$('categoryList'); if(dl){dl.innerHTML=''; cats.forEach(c=>{const o=document.createElement('option'); o.value=c.Category; o.label=c.Prefix; dl.appendChild(o);});}
+      ['recCondition'].forEach(id=>populateSelect(id,(bootstrap.conditions||[]).map(x=>({v:x})),'v',r=>r.v,null));
+      ['recOffice','assignOffice','returnOffice','trOffice','staffOffice','locOffice'].forEach(id=>populateSelect(id,offices,'OfficeID',r=>r.OfficeName));
+      ['recLocation','assignLocation','returnLocation','trLocation'].forEach(id=>populateSelect(id,locs,'LocationID',r=>[r.Building,r.Floor,r.Room].filter(Boolean).join(' / ')));
+      ['assignEmployee','trEmployee'].forEach(id=>populateSelect(id,staff,'EmployeeID',r=>`${r.EmployeeID} - ${r.Name}`));
+      populateSelect('recSupplier',sups,'SupplierID',r=>r.SupplierName);
+    }
+    $('recCategory').addEventListener('change',()=>{ const c=(bootstrap.categories||[]).find(x=>String(x.Category).toLowerCase()===val('recCategory').toLowerCase()); if(c) $('recPrefix').value=c.Prefix; });
+
+    document.querySelectorAll('#nav button[data-view]').forEach(btn=>btn.addEventListener('click',()=>showView(btn.dataset.view, btn.textContent.replace(/^[^A-Za-z]+/,''))));
+    function showView(id,title){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); $(id).classList.add('active'); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id)); $('pageTitle').textContent=title||id; $('sidebar').classList.remove('open'); if(id==='activity') loadActivity(); if(id==='users') loadUsers(); if(id==='maintenance') loadMaintenance(); if(id==='disposal') loadDisposals(); if(id==='reports') loadReport(); }
+    function toggleSidebar(){ $('sidebar').classList.toggle('open'); }
+
+    async function loadDashboard(){ try{ const d=await api('getDashboardStats'); $('statsGrid').innerHTML = stat('Total Assets',d.totalAssets)+stat('In Store',d.inStore)+stat('Assigned',d.assigned)+stat('Under Repair',d.underRepair)+stat('Missing',d.missing)+stat('Damaged',d.damaged)+stat('Disposed',d.disposed)+stat('Offices',d.offices); $('recentTxns').innerHTML = table(d.recentTransactions||[], ['DateTime','Type','AssetTag','ToEmployeeName','ToOffice','Remarks'], 10); $('statusSummary').innerHTML = Object.entries(d.statusCounts||{}).map(([k,v])=>`<span class="pill">${esc(k)}: <b>${v}</b></span>`).join('') || '<p class="muted">No data yet.</p>'; }catch(err){ toast(err.message); }}
+    function stat(label,value){return `<div class="card stat-card"><div class="stat-label">${label}</div><div class="stat-value">${value||0}</div></div>`}
+
+    $('receiveForm').addEventListener('submit', async e=>{ e.preventDefault(); $('qrOutput').innerHTML=''; try{ const data=await api('receiveAssets',{category:val('recCategory'),prefix:val('recPrefix'),quantity:val('recQuantity'),condition:val('recCondition'),description:val('recDescription'),brand:val('recBrand'),model:val('recModel'),serialNo:val('recSerialNo'),supplierId:val('recSupplier'),purchaseDate:val('recPurchaseDate'),purchasePrice:val('recPurchasePrice'),invoiceNo:val('recInvoiceNo'),warrantyExpiry:val('recWarrantyExpiry'),officeId:val('recOffice'),locationId:val('recLocation'),invoiceUrl:val('recInvoiceUrl'),photoUrl:val('recPhotoUrl'),remarks:val('recRemarks')}); renderQrCards(data); toast('Assets received successfully.'); await refreshAll(); $('receiveForm').reset(); }catch(err){ toast(err.message); }});
+    function renderQrCards(items){ const out=$('qrOutput'); out.innerHTML=''; items.forEach(item=>{ const card=document.createElement('div'); card.className='qr-card'; const q=document.createElement('div'); new QRCode(q,{text:location.origin+location.pathname+item.qrLink,width:86,height:86,correctLevel:QRCode.CorrectLevel.H}); const p=document.createElement('p'); p.textContent=item.tag; card.append(q,p); out.append(card); }); }
+
+    async function startScanner(){ $('reader').style.display='block'; $('startScanBtn').classList.add('hidden'); $('stopScanBtn').classList.remove('hidden'); html5QrCode = new Html5Qrcode('reader'); try{ await html5QrCode.start({facingMode:'environment'},{fps:10,qrbox:{width:250,height:250}}, decoded=>{ stopScanner(); const u = decoded.includes('?asset=') ? new URLSearchParams(decoded.split('?')[1]).get('asset') : decoded; $('lookupAssetTag').value=u; lookupAsset(); }); }catch(err){ toast('Camera access denied or unavailable.'); stopScanner(); }}
+    function stopScanner(){ if(html5QrCode){ html5QrCode.stop().catch(()=>{}); } $('reader').style.display='none'; $('startScanBtn').classList.remove('hidden'); $('stopScanBtn').classList.add('hidden'); }
+    async function lookupAsset(){ const tag=val('lookupAssetTag').toUpperCase(); if(!tag) return; try{ const data=await api('scanAsset',{assetTag:tag}); currentAsset=data.asset; renderAssetBox(data); $('trAssetTag').value=tag; $('maintAssetTag').value=tag; $('dispAssetTag').value=tag; $('attAssetTag').value=tag; }catch(err){ currentAsset=null; $('assetBox').innerHTML=`<h3>Asset Details</h3><div class="notice danger">${esc(err.message)}</div>`; }}
+    function renderAssetBox(data){ const a=data.asset; $('assetBox').innerHTML = `<h3>${esc(a.AssetTag)} ${fmtStatus(a.Status)}</h3><div class="grid two"><p><b>Category:</b><br>${esc(a.Category)}</p><p><b>Condition:</b><br>${esc(a.Condition)}</p><p><b>Description:</b><br>${esc(a.Description)}</p><p><b>Brand/Model:</b><br>${esc([a.Brand,a.Model].filter(Boolean).join(' / '))}</p><p><b>Serial No:</b><br>${esc(a.SerialNo)}</p><p><b>Assigned To:</b><br>${esc([a.AssignedEmployeeID,a.AssignedEmployeeName].filter(Boolean).join(' - ') || 'Not assigned')}</p><p><b>Office:</b><br>${esc(a.CurrentOffice)}</p><p><b>Location:</b><br>${esc(a.CurrentLocation)}</p><p><b>Supplier:</b><br>${esc(a.SupplierName)}</p><p><b>Invoice:</b><br>${a.InvoiceURL ? `<a href="${esc(a.InvoiceURL)}" target="_blank">Open</a>` : ''}</p></div><div id="singleQr" class="qr-list"></div><div class="row no-print"><button class="btn secondary" onclick="recordReprint()">Record/Reprint QR</button><button class="btn secondary" onclick="window.print()">Print</button></div><h3 style="margin-top:16px">Recent History</h3>${table(data.transactions||[],['DateTime','Type','FromEmployeeName','ToEmployeeName','FromOffice','ToOffice','Remarks'],8)}`; const q=document.createElement('div'); q.className='qr-card'; const box=document.createElement('div'); new QRCode(box,{text:location.origin+location.pathname+data.qrLink,width:86,height:86,correctLevel:QRCode.CorrectLevel.H}); q.append(box,Object.assign(document.createElement('p'),{textContent:a.AssetTag})); $('singleQr').append(q); }
+    async function recordReprint(){ if(!currentAsset) return toast('Search asset first.'); try{ await api('reprintTag',{assetTag:currentAsset.AssetTag}); toast('QR reprint recorded.'); }catch(err){toast(err.message);} }
+    $('assignForm').addEventListener('submit', async e=>{ e.preventDefault(); if(!currentAsset) return toast('Search asset first.'); try{ await api('assignAsset',{assetTag:currentAsset.AssetTag,employeeId:val('assignEmployee'),officeId:val('assignOffice'),locationId:val('assignLocation'),remarks:val('assignRemarks')}); toast('Asset assigned.'); await lookupAsset(); await loadDashboard(); }catch(err){toast(err.message);} });
+    $('returnForm').addEventListener('submit', async e=>{ e.preventDefault(); if(!currentAsset) return toast('Search asset first.'); try{ await api('returnAsset',{assetTag:currentAsset.AssetTag,officeId:val('returnOffice'),locationId:val('returnLocation'),remarks:val('returnRemarks')}); toast('Asset returned.'); await lookupAsset(); await loadDashboard(); }catch(err){toast(err.message);} });
+    async function markCurrent(status){ if(!currentAsset) return toast('Search asset first.'); try{ await api('markMissing',{assetTag:currentAsset.AssetTag,status,remarks:`Marked ${status} from scan page.`}); toast(`Asset marked ${status}.`); await lookupAsset(); await loadDashboard(); }catch(err){toast(err.message);} }
+    $('transferForm').addEventListener('submit', async e=>{ e.preventDefault(); try{ await api('transferAsset',{assetTag:val('trAssetTag'),toEmployeeId:val('trEmployee'),toOfficeId:val('trOffice'),toLocationId:val('trLocation'),remarks:val('trRemarks')}); toast('Asset transferred.'); $('transferForm').reset(); await loadDashboard(); }catch(err){toast(err.message);} });
+    async function searchClearance(){ try{ const d=await api('searchClearance',{employeeId:val('clearEmpId')}); $('clearanceResult').innerHTML = `<div class="notice ${d.clear?'success':'warning'}"><b>${d.clear?'Clear':'Assets assigned'}</b>${d.employee?.Name ? ` — ${esc(d.employee.EmployeeID)} ${esc(d.employee.Name)}` : ''}</div>` + table(d.assets||[],['AssetTag','Category','Description','Condition','Status','CurrentOffice','CurrentLocation'],100); }catch(err){toast(err.message);} }
+
+    function renderMasters(){ renderOfficeTable(); renderStaffTable(); renderLocationTable(); renderSupplierTable(); }
+    function renderOfficeTable(){ $('officeTable').innerHTML=table(bootstrap.offices||[],['OfficeName','Department','HeadName','Contact','Status'],200); }
+    function renderStaffTable(){ $('staffTable').innerHTML=table(bootstrap.staff||[],['EmployeeID','Name','Designation','OfficeName','Phone','Email','Status'],200); }
+    function renderLocationTable(){ $('locationTable').innerHTML=table(bootstrap.locations||[],['Building','Floor','Room','OfficeName','Status'],200); }
+    function renderSupplierTable(){ $('supplierTable').innerHTML=table(bootstrap.suppliers||[],['SupplierName','ContactPerson','Phone','Email','NTN','Status'],200); }
+    $('officeForm').addEventListener('submit', async e=>{ e.preventDefault(); try{ await api('saveOffice',{officeId:val('officeId'),officeName:val('officeName'),department:val('officeDepartment'),headName:val('officeHead'),contact:val('officeContact'),remarks:val('officeRemarks')}); toast('Office saved.'); $('officeForm').reset(); await refreshAll(); }catch(err){toast(err.message);} });
+    $('staffForm').addEventListener('submit', async e=>{ e.preventDefault(); try{ await api('saveStaff',{staffId:val('staffId'),employeeId:val('staffEmpId'),name:val('staffName'),designation:val('staffDesignation'),officeId:val('staffOffice'),phone:val('staffPhone'),email:val('staffEmail'),remarks:val('staffRemarks')}); toast('Staff saved.'); $('staffForm').reset(); await refreshAll(); }catch(err){toast(err.message);} });
+    $('locationForm').addEventListener('submit', async e=>{ e.preventDefault(); try{ await api('saveLocation',{locationId:val('locationId'),building:val('locBuilding'),floor:val('locFloor'),room:val('locRoom'),officeId:val('locOffice'),remarks:val('locRemarks')}); toast('Location saved.'); $('locationForm').reset(); await refreshAll(); }catch(err){toast(err.message);} });
+    $('supplierForm').addEventListener('submit', async e=>{ e.preventDefault(); try{ await api('saveSupplier',{supplierId:val('supplierId'),supplierName:val('supplierName'),contactPerson:val('supplierContactPerson'),phone:val('supplierPhone'),email:val('supplierEmail'),address:val('supplierAddress'),ntn:val('supplierNtn')}); toast('Supplier saved.'); $('supplierForm').reset(); await refreshAll(); }catch(err){toast(err.message);} });
+
+    $('maintForm').addEventListener('submit', async e=>{ e.preventDefault(); try{ await api('createMaintenance',{assetTag:val('maintAssetTag'),type:val('maintType'),vendor:val('maintVendor'),cost:val('maintCost'),sentDate:val('maintSentDate'),returnDate:val('maintReturnDate'),issueDetails:val('maintIssue')}); toast('Maintenance record created.'); $('maintForm').reset(); await loadMaintenance(); await loadDashboard(); }catch(err){toast(err.message);} });
+    async function loadMaintenance(){ try{ const rows=await api('getMaintenance'); $('maintTable').innerHTML = table(rows||[],['MaintID','AssetTag','Type','Status','ReportedAt','Vendor','Cost','IssueDetails','Resolution'],100,true); }catch(err){toast(err.message);} }
+    $('disposalForm').addEventListener('submit', async e=>{ e.preventDefault(); try{ await api('disposeAsset',{assetTag:val('dispAssetTag'),method:val('dispMethod'),approvedBy:val('dispApprovedBy'),disposalDate:val('dispDate'),value:val('dispValue'),fileUrl:val('dispFileUrl'),reason:val('dispReason')}); toast('Disposal recorded.'); $('disposalForm').reset(); await loadDisposals(); await loadDashboard(); }catch(err){toast(err.message);} });
+    async function loadDisposals(){ try{ const rows=await api('getDisposals'); $('disposalTable').innerHTML=table(rows||[],['DisposalID','AssetTag','Method','ApprovedBy','DisposalDate','Reason','Value'],100); }catch(err){toast(err.message);} }
+
+    async function loadReport(){ try{ const d=await api('getReports',{type:val('reportType')}); currentReportRows=d.rows||[]; $('reportMeta').textContent=`Generated: ${d.generatedAt} • Records: ${currentReportRows.length}`; $('reportTable').innerHTML=table(currentReportRows, Object.keys(currentReportRows[0]||{}).slice(0,12), 500); }catch(err){toast(err.message);} }
+    function exportCurrentReport(){ if(!currentReportRows.length) return toast('Generate a report first.'); const csv=toCsv(currentReportRows); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`inventory-report-${Date.now()}.csv`; a.click(); URL.revokeObjectURL(url); }
+    async function bulkImport(){ try{ const rows=parseCsv(val('importCsv')); const data=await api('bulkImportAssets',{rows}); $('importResult').innerHTML=`<div class="notice success">Created: ${data.created.length}. Skipped: ${data.skipped.length}</div>${data.skipped.length?table(data.skipped,['row','reason'],100):''}`; await refreshAll(); }catch(err){ setMsg('importResult',esc(err.message),'danger'); }}
+    $('attachmentForm').addEventListener('submit', async e=>{ e.preventDefault(); const file=$('attFile').files[0]; if(!file) return; try{ const base64=await fileToBase64(file); const data=await api('uploadAttachment',{assetTag:val('attAssetTag'),type:val('attType'),fileName:file.name,mimeType:file.type,base64,remarks:val('attRemarks')}); $('attachmentResult').innerHTML=`<div class="notice success">Uploaded: <a href="${esc(data.FileURL)}" target="_blank">${esc(data.FileName)}</a></div>`; $('attachmentForm').reset(); }catch(err){setMsg('attachmentResult',esc(err.message),'danger');} });
+    function fileToBase64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+
+    async function loadUsers(){ if(currentUser.role!=='SuperAdmin') return; try{ const rows=await api('getUsers'); $('userTable').innerHTML=table(rows||[],['Name','Email','Role','Status','CreatedAt','LastLogin'],200); }catch(err){toast(err.message);} }
+    $('userForm').addEventListener('submit', async e=>{ e.preventDefault(); try{ await api('saveUser',{userId:val('userIdField'),name:val('newUserName'),email:val('newUserEmail'),role:val('newUserRole'),password:val('newUserPassword')}); toast('User saved.'); $('userForm').reset(); await loadUsers(); }catch(err){toast(err.message);} });
+    async function loadActivity(){ try{ const rows=await api('getActivityLog',{limit:250}); $('activityTable').innerHTML=table(rows||[],['DateTime','UserName','Action','Entity','EntityID','Details'],250); }catch(err){toast(err.message);} }
+    $('changePasswordForm').addEventListener('submit', async e=>{ e.preventDefault(); try{ await api('changePassword',{currentPassword:val('currentPassword'),newPassword:val('newPassword')}); toast('Password changed. Please login again.'); setTimeout(logout,1000); }catch(err){toast(err.message);} });
+
+    function table(rows, cols, limit=100){ if(!rows || !rows.length) return '<p class="muted">No records found.</p>'; cols = cols && cols.length ? cols : Object.keys(rows[0]||{}); return `<div class="table-wrap"><table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.slice(0,limit).map(r=>`<tr>${cols.map(c=>`<td>${cell(r[c], c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`; }
+    function cell(v,c){ if(c==='Status') return fmtStatus(v); if(String(v||'').startsWith('http')) return `<a href="${esc(v)}" target="_blank">Open</a>`; return esc(v); }
+    function toCsv(rows){ const cols=Object.keys(rows[0]||{}); const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"'; return [cols.map(quote).join(','),...rows.map(r=>cols.map(c=>quote(r[c])).join(','))].join('\n'); }
+    function parseCsv(text){ const lines=text.split(/\r?\n/).filter(x=>x.trim()); if(lines.length<2) throw new Error('CSV must include header and at least one row.'); const headers=splitCsvLine(lines[0]).map(h=>h.trim()); return lines.slice(1).map(line=>{ const vals=splitCsvLine(line); const obj={}; headers.forEach((h,i)=>obj[h]=vals[i]||''); return obj; }); }
+    function splitCsvLine(line){ const out=[]; let cur='', q=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(ch==='"' && line[i+1]==='"'){cur+='"';i++;} else if(ch==='"'){q=!q;} else if(ch===',' && !q){out.push(cur);cur='';} else cur+=ch; } out.push(cur); return out; }
+
+    (function init(){ const saved=sessionStorage.getItem('currentUser'); if(saved){ currentUser=JSON.parse(saved); openApp().catch(err=>{toast(err.message); logout();}); } })();
+  </script>
 </body>
 </html>
